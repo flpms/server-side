@@ -15,32 +15,35 @@ var eventEmitter = new events.EventEmitter();
 //var aws = require('aws-lib');
 var handlebars = require('handlebars');
 var Q = require('Q');
-var templates = require('./modules/templates');
-
+//var templates = require('WebContent/');
 var cluster = require('cluster');
 var os = require('os');
 
 var locations = {
+	name: 'localhost',
 	default:{
-		port:'8080',
-		name:'localhost'
+		port:1337,
+		actived:true
 	},
 	icon: {
-		port:'8085',
-		name:'localhost'
+		port:8085,
+		actived:false
 	},
 	html: {
-		port:'8000',
-		name:'localhost'
+		port:8080,
+		actived:false
+	},
+	api: {
+		port:8000,
+		actived:false
+	},
+	images: {
+		port:8081,
+		actived:false
 	}
 };
 
-function iconServer() {
-	console.log("Other server");
-};
-
 var main = function(req, res) {
-	
 	var urlData = url.parse(req.url);
 	console.log("Call to URL :"+ urlData.pathname);
 	if (req.method.toUpperCase() === "GET" && urlData.pathname === "/api") {
@@ -56,8 +59,8 @@ var main = function(req, res) {
 		res.write(JSON.stringify(processedData));
 	} else if(urlData.pathname.search(".html") === -1) {
 		console.log('Call templates');
-		var templateName = urlData.pathname.replace(".html");
-		console.log(templates,'\n'+templateName);
+		//var templateName = urlData.pathname.replace(".html");
+		//console.log(templates,'\n'+templateName);
 		/*var pageBuilder = handlebars.compile(template);
 		var pageText = pageBuilder(source);*/
 		res.writeHead(200, {"Context-Type": "text/html"});
@@ -68,8 +71,16 @@ var main = function(req, res) {
 		console.log("Server has started on port 8085");
 	}
 	processedData = {'teste':'teste'};
-	
 	res.end();
+}
+
+var icon = function(req, res) {
+	if (req.url === '/favicon.ico') {
+	    res.writeHead(200, {'Content-Type': 'image/x-icon'} );
+	    res.end();
+	    console.log('favicon requested');
+	    return;
+	}
 }
 
 if (cluster.isMaster) {
@@ -87,20 +98,24 @@ if (cluster.isMaster) {
 		console.log('Cluster %d caiu fora.', worker.process.pid);
 	});
 } else {
-	var server = http.createServer(main);
-	switch(requestIs) {
-		case 'html':
-			server.listen(locations.html.port,locations.html.name);
-			console.log('Server has started on port '+locations.html.port);
-			break;
-		case 'icon':
-			server.listen(locations.icon.port,locations.icon.name);
-			console.log('Server has started on port '+locations.icon.port);
-			break;
-		default:
-			server.listen(locations.default.port,locations.default.name);
-			console.log('Server has started on port '+locations.default.port);
-			break;
+	if (!locations.html.actived) {
+		var server = http.createServer(main);
+		server.listen(locations.html.port,locations.name);
+		locations.html.actived = true;
+		console.log("Server work to html on port "+ locations.html.port);
 	}
-	console.log("Server has started on port 8000.");
+
+	if(!locations.icon.actived) {
+		var server = http.createServer(icon);
+		server.listen(locations.icon.port,locations.name);
+		locations.icon.actived = true;
+		console.log("Server work to icon on port "+ locations.icon.port);
+	}
+
+	if(!locations.default.actived) {
+		var server = http.createServer(main);
+		server.listen(locations.default.port,locations.name);
+		locations.default.actived = true;
+		console.log("Server work to default on port "+ locations.default.port);
+	}
 }
