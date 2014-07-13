@@ -22,9 +22,10 @@ var main = function(req, res) {
 	    	res.writeHead(200, {'Content-Type': 'image/x-icon'});
 			break;
 		case 'html':
-			var template = templates;
+			log('info', {code: 02, msg:'Request template',obj:''});
+			var template = templates.loadTemplate('','./Templates');
 			res.writeHead(200, {"Context-Type": "text/html"});
-			res.write(template);
+			res.write('oi');
 			break;
 		case 'api':
 			var searchParams = querystring.parse(urlData.query);
