@@ -16,14 +16,16 @@ var main = function(req, res) {
 	log('info', {code:'01',msg:'Server requested',obj:''});
 	var urlData = url.parse(req.url);
 	var extension = urlData.pathname.split(/[.]/g);
-
 	switch(extension[1]){
 		case 'ico':
 	    	res.writeHead(200, {'Content-Type': 'image/x-icon'});
 			break;
 		case 'html':
 			log('info', {code: 02, msg:'Request template',obj:''});
-			var template = templates.loadTemplate('','./Templates');
+			var tpl = new Templates();
+			console.log(tpl);
+			// templates.init(urlData.path);
+			// var template = templates.loadTemplate('./Templates');
 			res.writeHead(200, {"Context-Type": "text/html"});
 			res.write('oi');
 			break;
