@@ -9,27 +9,16 @@ var http = require('http');
 var url = require('url');
 var querystring = require('querystring');
 var Q = require('Q');
-var templates = require('./modules/templates.js');
-var log = require('./modules/log.js');
+var Templates = require('./modules/templates.js');
+var Log = new require('./modules/log.js');
 
 var main = function(req, res) {
-	log('info', {code:'01',msg:'Server requested',obj:''});
+	Log.log({code:'001',msg:'Server requested',obj:''});
 	var urlData = url.parse(req.url);
 	var extension = urlData.pathname.split(/[.]/g);
 	switch(extension[1]){
-		case 'ico':
-	    	res.writeHead(200, {'Content-Type': 'image/x-icon'});
-			break;
-		case 'html':
-			log('info', {code: 02, msg:'Request template',obj:''});
-			var tpl = new Templates();
-			console.log(tpl);
-			// templates.init(urlData.path);
-			// var template = templates.loadTemplate('./Templates');
-			res.writeHead(200, {"Context-Type": "text/html"});
-			res.write('oi');
-			break;
 		case 'api':
+			Log.info({code: '002', msg:'Request API',obj:''});
 			var searchParams = querystring.parse(urlData.query);
 			searchParams.item = encodeURI(searchParams.item);
 			if (searchParams.holmes === true) {
@@ -41,11 +30,23 @@ var main = function(req, res) {
 			var requestIs = '';
 			res.write(JSON.stringify(processedData));
 			break;
+		case 'html':
+			Log.info({code: '003', msg:'Request template html',obj:''});
+			var template = new Templates(urlData.path);
+			template.loadTemplate('./Templates');
+			res.writeHead(200, {"Context-Type": "text/html"});
+			res.write('oi');
+			break;
 		case 'png':
+			Log.info({code: '004', msg:'Request template html',obj:''});
+			break;
+		case 'ico':
+			Log.info({code: '002', msg:'Request favico',obj:''});
+	    	res.writeHead(200, {'Content-Type': 'image/x-icon'});
 			break;
 	}
 	res.end();
 };
 
 http.createServer(main).listen(8080,'localhost');
-log('log',{code: '01', msg: 'Server Started on port 8080', obj:''});
+Log.log({code: '000', msg: 'Started on port 8080', obj:''});
