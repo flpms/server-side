@@ -1,16 +1,11 @@
 var handlebars = require('handlebars');
 var fs = require('fs');
-var log = require('./log.js');
+var Log = new require('./log.js');
 
-var Templates = function() {
+Templates = function(templateName) {
 	this.templateName = '';
 
-	this.init = function (templateName) {
-		this.templateName = templateName;
-		log('info',{code: 00, msg:'Templates Called', obj:{'Template Name':templateName} });
-	},
-
-	this.sanitizeTemplateName =  function () {
+	var sanitizeTemplateName =  function () {
 		var name = '';
 		name = templateName.replace(/^[\/]/g,'');
 		name = templateName.replace('.html','');
@@ -18,31 +13,39 @@ var Templates = function() {
 		name = templateName.replace('.htm','');
 		return new String(name);
 	},
+	init = function (templateName) {
+		Log.info({code: '011', msg:'Templates Init', obj:templateName });
+		this.templateName = templateName;
+	}; 
 
 	this.loadTemplate = function(path){
+		Log.info({code:'012', msg:'Loading Template', obj:path});
 		var tmpltName = sanitizeTemplateName(this.templateName);
-		console.log(tmpltName);
 		try {
 			var files = fs.readdirSync(path);
 			if(!files) {
-				log('warn', { code: 01, msg: 'Files not Found', obj:''});
-				throw 'Nos files in directory';
+				throw 'No files in directory';
 			}
-			log('info',{code:00, msg:'Files Load', obj:files});
-
+			Log.info({code:'14', msg:'Files Founded', obj:files});
+			
 			for(var i = 0; i < files.length; i++) {
 				if(files[i].search('.html') !== -1){
 					template = fs.readFileSync('./'+templateName, "utf8");
 				}
 			}
 		} catch(e) {
-			log('error', {code: 01, msg:'Template not found',obj:e});
+			var exception = eval(e);
+			if(typeof exception.errno === undefined) {
+				Log.error({code: '013', msg:'Template not found',obj:exception});
+			} else {
+				var a = exception;
+				Log.error({code: exception.errno, msg: (exception.code +'\u0020'+exception.syscall), obj:exception.path});
+			}
 		}
 		return files;
-	}
-	return {
-		init : this.init,
-		loadTemplate: this.loadTemplate
-	}
+	};
+	Log.info({code: '10', msg: 'Template Object', obj:'' });
+	init(templateName);
 }
-exports.templates = Templates;
+
+module.exports = Templates;
