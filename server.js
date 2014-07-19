@@ -11,6 +11,7 @@ var querystring = require('querystring');
 var Q = require('Q');
 var Templates = require('./modules/templates.js');
 var handlebars = require('handlebars');
+var fs = require('fs');
 var Log = new require('./modules/log.js');
 var main = function(req, res) {
 	Log.log({code:'001',msg:'-* Server requested *-',obj:''});
@@ -37,11 +38,28 @@ var main = function(req, res) {
 			var compiler = handlebars.compile(templateLoaded);
 			var templateCompiled = compiler({siteTitle:"Holmes"});
 			res.writeHead(200, {"Context-Type": "text/html"});
-			res.write(''+templateCompiled);
 			Log.info({code:'010', msg:'Write template ', obj:'' });
+			res.write(''+templateCompiled);
 			break;
-		case 'png':
-			Log.info({code: '004', msg:'Request template html',obj:''});
+		case 'css' || ('png' || 'jpg') || 'js':
+			Log.info({code: '004', msg:'Request '+extension[1],obj:''});
+			try {
+
+				var file = fs.readFileSync('./'+urlData.pathname, "utf8");
+				if(extension[1] === 'css'){
+					res.writeHead(200, {"Context-Type": "text/css"});
+				} else if ('png' || 'jpg') {
+					res.writeHead(200, {"Context-Type": "text/"+extension[1]});
+				} else{
+					res.writeHead(200, {"Context-Type": "application/x-javascript"});
+				}
+				res.write(file);
+			} catch(e){
+				var exception = eval(e);
+				Log.error({code: exception.errno, msg: ('Error to'+'\u0020'+exception.syscall), obj:exception.path});
+				res.writeHead(404, {"Context-Type": "text/css"});
+				res.write('');
+			}
 			break;
 		case 'ico':
 			Log.info({code: '002', msg:'Request favico',obj:''});

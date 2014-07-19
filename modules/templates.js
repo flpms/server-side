@@ -13,7 +13,7 @@ Templates = function(templateName) {
 	init = function (templateName) {
 		Log.info({code: '011', msg:'Templates Init', obj:templateName });
 		this.templateName = templateName;
-	}; 
+	};
 
 	this.loadTemplate = function(path){
 		Log.info({code:'012', msg:'Loading Template', obj:path});
@@ -22,9 +22,6 @@ Templates = function(templateName) {
 		try {
 			var files = fs.readdirSync(path);
 			Log.info({code:'14', msg:'Files Founded', obj: files});
-			if(!files) {
-				throw 'No files in directory';
-			}
 			
 			for(var i = 0; i < files.length; i++) {
 				if(files[i].search('.html') !== -1 && tmpltName === files[i]){
@@ -35,12 +32,8 @@ Templates = function(templateName) {
 			}
 		} catch(e) {
 			var exception = eval(e);
-			if(typeof exception.errno === undefined) {
-				Log.error({code: '013', msg:'Template not found',obj:exception});
-			} else {
-				var a = exception;
-				Log.error({code: exception.errno, msg: (exception.code +'\u0020'+exception.syscall), obj:exception.path});
-			}
+			var a = exception;
+			Log.error({code: exception.errno, msg: (exception.code +'\u0020'+exception.syscall), obj:exception.path});
 		}
 		return template;
 	};
