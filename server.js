@@ -10,10 +10,10 @@ var url = require('url');
 var querystring = require('querystring');
 var Q = require('Q');
 var Templates = require('./modules/templates.js');
+var handlebars = require('handlebars');
 var Log = new require('./modules/log.js');
-
 var main = function(req, res) {
-	Log.log({code:'001',msg:'Server requested',obj:''});
+	Log.log({code:'001',msg:'-* Server requested *-',obj:''});
 	var urlData = url.parse(req.url);
 	var extension = urlData.pathname.split(/[.]/g);
 	switch(extension[1]){
@@ -33,9 +33,12 @@ var main = function(req, res) {
 		case 'html':
 			Log.info({code: '003', msg:'Request template html',obj:''});
 			var template = new Templates(urlData.path);
-			template.loadTemplate('./Templates');
+			var templateLoaded = template.loadTemplate('./Templates');
+			var compiler = handlebars.compile(templateLoaded);
+			var templateCompiled = compiler({siteTitle:"Holmes"});
 			res.writeHead(200, {"Context-Type": "text/html"});
-			res.write('oi');
+			res.write(''+templateCompiled);
+			Log.info({code:'010', msg:'Write template ', obj:'' });
 			break;
 		case 'png':
 			Log.info({code: '004', msg:'Request template html',obj:''});
@@ -45,6 +48,7 @@ var main = function(req, res) {
 	    	res.writeHead(200, {'Content-Type': 'image/x-icon'});
 			break;
 	}
+	Log.info({code: '005', msg:'-* End Request *-', obj:''});
 	res.end();
 };
 

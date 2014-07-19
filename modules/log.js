@@ -5,8 +5,8 @@ var Log = function() {
 		if(!msg) {
 			return;
 		}
-		if(msg.length < 30) {
-			for (var i = msg.length; i <= 29; i++) {
+		if(msg.length < 25) {
+			for (var i = msg.length; i <= 25; i++) {
 				msg += '\u0020';
 			};
 			return msg;

@@ -8,10 +8,7 @@ Templates = function(templateName) {
 	var sanitizeTemplateName =  function () {
 		var name = '';
 		name = templateName.replace(/^[\/]/g,'');
-		name = templateName.replace('.html','');
-		name = templateName.replace('.xhtml','');
-		name = templateName.replace('.htm','');
-		return new String(name);
+		return name;
 	},
 	init = function (templateName) {
 		Log.info({code: '011', msg:'Templates Init', obj:templateName });
@@ -21,16 +18,19 @@ Templates = function(templateName) {
 	this.loadTemplate = function(path){
 		Log.info({code:'012', msg:'Loading Template', obj:path});
 		var tmpltName = sanitizeTemplateName(this.templateName);
+		var template; 
 		try {
 			var files = fs.readdirSync(path);
+			Log.info({code:'14', msg:'Files Founded', obj: files});
 			if(!files) {
 				throw 'No files in directory';
 			}
-			Log.info({code:'14', msg:'Files Founded', obj:files});
 			
 			for(var i = 0; i < files.length; i++) {
-				if(files[i].search('.html') !== -1){
-					template = fs.readFileSync('./'+templateName, "utf8");
+				if(files[i].search('.html') !== -1 && tmpltName === files[i]){
+					Log.info({code:'15', msg:'File Founded',obj:''});
+					template = fs.readFileSync(path+'/'+tmpltName, "utf8");
+					Log.info({code:'16',msg:'Template Loaded',obj:''});
 				}
 			}
 		} catch(e) {
@@ -42,9 +42,9 @@ Templates = function(templateName) {
 				Log.error({code: exception.errno, msg: (exception.code +'\u0020'+exception.syscall), obj:exception.path});
 			}
 		}
-		return files;
+		return template;
 	};
-	Log.info({code: '10', msg: 'Template Object', obj:'' });
+	Log.info({code: '10', msg:'Template Object', obj:'' });
 	init(templateName);
 }
 
