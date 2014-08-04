@@ -13,6 +13,7 @@ var Templates = require('./modules/templates.js');
 var handlebars = require('handlebars');
 var fs = require('fs');
 var Log = new require('./modules/log.js');
+
 var main = function(req, res) {
 	Log.log({code:'001',msg:'-* Server requested *-',obj:''});
 	var urlData = url.parse(req.url);
@@ -23,9 +24,9 @@ var main = function(req, res) {
 			var searchParams = querystring.parse(urlData.query);
 			searchParams.item = encodeURI(searchParams.item);
 			if (searchParams.holmes === true) {
-				
+
 			} else {
-				
+
 			}
 			res.writeHead(200, {'Content-Type': 'application/json'});
 			var requestIs = '';
